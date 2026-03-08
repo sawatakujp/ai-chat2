@@ -1,0 +1,32 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Thread {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  title        String
+  model        String
+  provider     String
+  systemPrompt String    @default("")
+  messages     Message[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Message {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  threadId    String   @db.ObjectId
+  thread      Thread   @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  role        String
+  content     String
+  attachments Json[]   @default([])
+  createdAt   DateTime @default(now())
+
+  @@index([threadId])
+}
